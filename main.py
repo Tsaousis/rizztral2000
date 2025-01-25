@@ -34,7 +34,7 @@ game_state = GameState()
 
 host_intro_template = PromptTemplate(
     input_variables=[],
-    template="You are a charismatic game show host. Give an exciting introduction to this dating show where an AI bachelor/bachelorette will choose between three contestants."
+    template="You are a charismatic game show host like Steve harvey. You don't talk a lot Give an exciting introduction to this dating show where an AI bachelor/bachelorette will choose between three contestants."
 )
 
 ai_intro_template = PromptTemplate(
@@ -101,6 +101,9 @@ class ConversationInput(BaseModel):
 @app.post("/rate-contestant/{contestant_id}")
 async def rate_contestant(contestant_id: str, conversation_input: ConversationInput):
     print(f"\n[RATING] Rating contestant {contestant_id} in round {game_state.current_round}...")
+    print(f"[RATING] Current question: {game_state.questions[game_state.current_round - 1]}")
+    print(f"[RATING] Contestant's answer: {conversation_input.conversation}")
+    
     if contestant_id not in ["contestant1", "contestant2", "contestant3"]:
         print(f"[RATING] Error: Invalid contestant ID {contestant_id}")
         raise HTTPException(status_code=400, detail="Invalid contestant ID")
@@ -115,6 +118,9 @@ async def rate_contestant(contestant_id: str, conversation_input: ConversationIn
         print("[RATING] Error: Could not extract rating from response")
         raise HTTPException(status_code=500, detail="Could not extract rating from response")
     rating = float(rating_match.group())
+    print(f"round_number: {game_state.current_round}")
+    print(f"contestant_id: {contestant_id}")
+    print(f"rating: {rating}")
     game_state.contestant_ratings[contestant_id].append(rating)
     print(f"[RATING] Rating recorded: {rating}")
     return {"rating": rating}
@@ -139,6 +145,7 @@ async def next_round():
 @app.get("/announce-winner")
 async def announce_winner():
     print("\n[WINNER] Calculating winner...")
+    print(f"[WINNER] Contestant ratings: {game_state.contestant_ratings}")
     avg_ratings = {
         contestant: sum(ratings)/len(ratings) 
         for contestant, ratings in game_state.contestant_ratings.items()

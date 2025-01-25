@@ -19,17 +19,17 @@ def test_dating_game():
 
     conversations = {
         1: [
-            "I love Mcdonalds and I am really stingy.",
-            "I love KFC and I am a very insecure person.",
-            "I'm a balanced person who enjoys both adventure and quiet time. I value emotional intelligence and can adapt to different situations."
+            "I am really stingy.",
+            "Family is everything to me. I come from a big family and hope to have one of my own. I believe in traditional values while being open-minded.",
+            "My ideal date would be cooking together, then watching the sunset. I believe small moments create lasting memories.",
         ],
         2: [
-            "Family is everything to me. I come from a big family and hope to have one of my own. I believe in traditional values while being open-minded.",
+            "I hate going on dates fuck you",
             "I'm career-focused but know how to maintain work-life balance. I believe in supporting each other's dreams while building something together.",
             "I'm passionate about personal growth and helping others. I volunteer at local shelters and believe in making the world better together."
         ],
         3: [
-            "My ideal date would be cooking together, then watching the sunset. I believe small moments create lasting memories.",
+            "fuck off",
             "I love spontaneous trips and surprises. Life's too short to plan everything - sometimes you need to just go with the flow.",
             "I believe in open communication and emotional honesty. Trust and understanding are the foundations of any relationship."
         ]
