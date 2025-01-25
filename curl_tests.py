@@ -1,3 +1,4 @@
+# test_api.py
 import requests
 import json
 
@@ -18,8 +19,8 @@ def test_dating_game():
 
     conversations = {
         1: [
-            "I believe in living life to the fullest. I'm an adventurous spirit who loves hiking, skydiving, and trying exotic cuisines. I think shared experiences create the strongest bonds.",
-            "I'm more of an intellectual person. I love deep conversations about philosophy, science, and the meaning of life. I believe mental connection is key.",
+            "I love Mcdonalds and I am really stingy.",
+            "I love KFC and I am a very insecure person.",
             "I'm a balanced person who enjoys both adventure and quiet time. I value emotional intelligence and can adapt to different situations."
         ],
         2: [
