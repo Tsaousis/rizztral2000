@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain.chains import LLMChain
@@ -11,6 +12,15 @@ app = FastAPI()
 llm = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
     model_name="mixtral-8x7b-32768"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class GameState:
