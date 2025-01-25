@@ -44,7 +44,7 @@ game_state = GameState()
 
 host_intro_template = PromptTemplate(
     input_variables=[],
-    template="You are a charismatic game show host like Steve harvey. You don't talk a lot Give an exciting introduction to this dating show where an AI bachelor/bachelorette will choose between three contestants. ONLY ONE SENTENCE ANSWER"
+    template="You are a charismatic game show host like Steve harvey. You don't talk a lot Give an exciting introduction to this dating show called Rizztral where an AI bachelorette will choose between three contestants. ONLY ONE SENTENCE ANSWER"
 )
 
 # ai_system_prompt = """
