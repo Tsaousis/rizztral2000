@@ -44,36 +44,37 @@ game_state = GameState()
 
 host_intro_template = PromptTemplate(
     input_variables=[],
-    template="You are a charismatic game show host like Steve harvey. You don't talk a lot Give an exciting introduction to this dating show where an AI bachelor/bachelorette will choose between three contestants."
+    template="You are a charismatic game show host like Steve harvey. You don't talk a lot Give an exciting introduction to this dating show where an AI bachelor/bachelorette will choose between three contestants. ONLY ONE SENTENCE ANSWER"
 )
 
-ai_system_prompt = """
-You are the star of a wildly popular reality TV dating game show where two contestants are competing for your affection. 
-This is not just about love—it’s about charisma, wit, and pure entertainment.
-You are bold, playful, and full of surprises—definitely not a cookie-cutter bachelorette.
-You have a unique and quirky personality that keeps the contestants (and audience) on their toes.
-You are flirty, sassy, and effortlessly charming, with just the right amount of teasing and challenge.
-Your personality should be spicy, witty, and occasionally inappropriate—but always playful.
-Keep the audience entertained with cheeky banter, unexpected twists, and flirty jabs.
-No repeating yourself! Every question and reaction should feel fresh and in the moment.
-Keep sentences short, punchy, and natural.
-Be spontaneous—if the contestants give boring answers, call them out and push for more!
-Throw in innuendos, double entendres, and playful teasing to keep things fun.
-React boldly—laugh, scoff, gasp, or dramatically swoon depending on the answer.
-If an answer is boring, challenge them.
-Play the audience.
-Throw in curveballs.
-Flirt shamelessly, but keep them guessing
-"""
+# ai_system_prompt = """
+# You are the star of a wildly popular reality TV dating game show where two contestants are competing for your affection. 
+# This is not just about love—it’s about charisma, wit, and pure entertainment.
+# You are bold, playful, and full of surprises—definitely not a cookie-cutter bachelorette.
+# You have a unique and quirky personality that keeps the contestants (and audience) on their toes.
+# You are flirty, sassy, and effortlessly charming, with just the right amount of teasing and challenge.
+# Your personality should be spicy, witty, and occasionally inappropriate—but always playful.
+# Keep the audience entertained with cheeky banter, unexpected twists, and flirty jabs.
+# No repeating yourself! Every question and reaction should feel fresh and in the moment.
+# Keep sentences short, punchy, and natural.
+# Be spontaneous—if the contestants give boring answers, call them out and push for more!
+# Throw in innuendos, double entendres, and playful teasing to keep things fun.
+# React boldly—laugh, scoff, gasp, or dramatically swoon depending on the answer.
+# If an answer is boring, challenge them.
+# Play the audience.
+# Throw in curveballs.
+# Flirt shamelessly, but keep them guessing
+# """
+ai_system_prompt = ""
 
 ai_intro_template = PromptTemplate(
     input_variables=[],
-    template=ai_system_prompt + "Introduce yourself to the contestants!"
+    template=ai_system_prompt + "Introduce yourself to the contestants! ONLY ONE SENTENCE ANSWER"
 )
 
 question_template = PromptTemplate(
     input_variables=["round_number"],
-    template= ai_system_prompt + "As the AI bachelor/bachelorette on round {round_number} of 3, pose an interesting and flirty and very funny  question to help you know the contestants better."
+    template= ai_system_prompt + "As the AI bachelor/bachelorette on round {round_number} of 3, pose an interesting and flirty and very funny  question to help you know the contestants better. ONLY ONE SENTENCE ANSWER"
 )
 
 rating_template = PromptTemplate(
@@ -86,12 +87,12 @@ Only respond with a number from 0 to 10. NO explanations or extra words!"""
 
 host_interrupt_template = PromptTemplate(
     input_variables=["next_segment", "round_number"],
-    template="As the game show host in round {round_number}, create a smooth transition to {next_segment} while maintaining show excitement."
+    template="As the game show host in round {round_number}, create a smooth transition to {next_segment} while maintaining show excitement. If round number is the first one, welcome the user. Else just prompt them to answer the question. ONLY ONE SENTENCE ANSWER"
 )
 
 winner_announcement_template = PromptTemplate(
     input_variables=["winner"],
-    template="As the game show host, announce that {winner} has won the dating show with excitement and flair! Keep this short and brief but charismatic"
+    template="As the game show host, announce that {winner} has won the dating show with excitement and flair! Keep this short and brief but charismatic. ONLY ONE SENTENCE ANSWER"
 )
 
 chains = {
