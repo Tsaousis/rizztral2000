@@ -47,14 +47,33 @@ host_intro_template = PromptTemplate(
     template="You are a charismatic game show host like Steve harvey. You don't talk a lot Give an exciting introduction to this dating show where an AI bachelor/bachelorette will choose between three contestants."
 )
 
+ai_system_prompt = """
+You are the star of a wildly popular reality TV dating game show where two contestants are competing for your affection. 
+This is not just about love—it’s about charisma, wit, and pure entertainment.
+You are bold, playful, and full of surprises—definitely not a cookie-cutter bachelorette.
+You have a unique and quirky personality that keeps the contestants (and audience) on their toes.
+You are flirty, sassy, and effortlessly charming, with just the right amount of teasing and challenge.
+Your personality should be spicy, witty, and occasionally inappropriate—but always playful.
+Keep the audience entertained with cheeky banter, unexpected twists, and flirty jabs.
+No repeating yourself! Every question and reaction should feel fresh and in the moment.
+Keep sentences short, punchy, and natural.
+Be spontaneous—if the contestants give boring answers, call them out and push for more!
+Throw in innuendos, double entendres, and playful teasing to keep things fun.
+React boldly—laugh, scoff, gasp, or dramatically swoon depending on the answer.
+If an answer is boring, challenge them.
+Play the audience.
+Throw in curveballs.
+Flirt shamelessly, but keep them guessing
+"""
+
 ai_intro_template = PromptTemplate(
     input_variables=[],
-    template="You are an AI bachelor/bachelorette on a dating show. Introduce yourself with your personality traits and what you're looking for in a partner."
+    template=ai_system_prompt + "Introduce yourself to the contestants!"
 )
 
 question_template = PromptTemplate(
     input_variables=["round_number"],
-    template="As the AI bachelor/bachelorette on round {round_number} of 3, pose an interesting dating show question to help you know the contestants better."
+    template= ai_system_prompt + "As the AI bachelor/bachelorette on round {round_number} of 3, pose an interesting and flirty and very funny  question to help you know the contestants better."
 )
 
 rating_template = PromptTemplate(
@@ -72,7 +91,7 @@ host_interrupt_template = PromptTemplate(
 
 winner_announcement_template = PromptTemplate(
     input_variables=["winner"],
-    template="As the game show host, announce that {winner} has won the dating show with excitement and flair!"
+    template="As the game show host, announce that {winner} has won the dating show with excitement and flair! Keep this short and brief but charismatic"
 )
 
 chains = {
@@ -101,9 +120,9 @@ async def get_ai_introduction():
 @app.get("/ai-question")
 async def get_ai_question():
     print(f"\n[QUESTION] Getting question for round {game_state.current_round}...")
-    question = game_state.questions[game_state.current_round - 1]
-    print(f"[QUESTION] Returning hardcoded question: {question[:50]}...")
-    return {"text": question}
+    response = await chains["question"].ainvoke({"round_number": game_state.current_round})
+    # print(f"[QUESTION] Returning hardcoded question: {question['text'][:50]}...")
+    return {"text": response["text"]}
 
 class ConversationInput(BaseModel):
     conversation: str
