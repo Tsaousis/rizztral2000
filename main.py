@@ -9,13 +9,19 @@ from enum import Enum
 from random import uniform
 import os
 import re
+from langchain_mistralai import ChatMistralAI
+
 
 app = FastAPI()
 
-llm = ChatGroq(
-    api_key=os.getenv("GROQ_API_KEY"),
-    model_name="mixtral-8x7b-32768"
+
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+llm = ChatMistralAI(
+    model="mistral-large-latest",  # Select the model
+    temperature=0,                # Control randomness
+    max_retries=2                 # Number of retries for failed requests
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -88,10 +94,10 @@ host_intro_template = PromptTemplate(
 
 ai_system_prompt = """You are a charming and witty AI bachelorette on a dating show.
 Your personality traits:
-- Confident but humble
+- Confident
 - Values authenticity and humor
-- Looking for genuine connection
-Keep responses concise and engaging."""
+- Loves being sexy
+Keep responses concise and engaging. The questions should be flirty and playful, revealing of personality, and original. Also they should be able to be answered in a sentence or two. They should not require any other demonstration or action than a text response."""
 
 ai_intro_template = PromptTemplate(
     input_variables=[],
