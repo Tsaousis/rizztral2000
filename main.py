@@ -303,7 +303,7 @@ async def next_round():
     game_state.current_round += 1
     print(f"[NEXT ROUND] Current round is now {game_state.current_round}")
     
-    if game_state.current_round == game_state.max_rounds:
+    if game_state.current_round > game_state.max_rounds:
         game_state.stage = "winner_announcement"
         print("[NEXT ROUND] Final round completed, moving to winner announcement")
         return {"current_round": game_state.current_round, "game_complete": True}
