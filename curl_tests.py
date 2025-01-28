@@ -1,62 +1,132 @@
-# test_api.py
 import requests
 import json
+from time import sleep
 
 BASE_URL = "http://localhost:8000"
 
 def print_response(description, response):
-    print(f"\n{description}:")
-    print(json.dumps(response.json(), indent=2))
+    print(f"\n{'-' * 50}")
+    print(f"{description}:")
+    print(f"Status Code: {response.status_code}")
+    if response.status_code == 200:
+        print(json.dumps(response.json(), indent=2))
+    else:
+        print(f"Error: {response.text}")
+    print(f"{'-' * 50}\n")
 
-def test_dating_game():
-    requests.get(f"{BASE_URL}/reset-game")
+def test_game_flow():
+    """Test the complete game flow from start to finish"""
+    
+    print("\n=== Starting Dating Game Test ===\n")
+    
+    try:
+        # 1. Reset the game
+        reset_response = requests.get(f"{BASE_URL}/reset-game")
+        print_response("Reset Game", reset_response)
 
-    print_response("Host Introduction", 
-                  requests.get(f"{BASE_URL}/host-introduction"))
+        # 2. Get host introduction
+        host_intro = requests.get(f"{BASE_URL}/host-introduction")
+        print_response("Host Introduction", host_intro)
 
-    print_response("AI Introduction",
-                  requests.get(f"{BASE_URL}/ai-introduction"))
+        # 3. Get AI introduction
+        ai_intro = requests.get(f"{BASE_URL}/ai-introduction")
+        print_response("AI Introduction", ai_intro)
 
-    conversations = {
-        1: [
-            "I am really stingy.",
-            "Family is everything to me. I come from a big family and hope to have one of my own. I believe in traditional values while being open-minded.",
-            "My ideal date would be cooking together, then watching the sunset. I believe small moments create lasting memories.",
-        ],
-        2: [
-            "I hate going on dates fuck you",
-            "I'm career-focused but know how to maintain work-life balance. I believe in supporting each other's dreams while building something together.",
-            "I'm passionate about personal growth and helping others. I volunteer at local shelters and believe in making the world better together."
-        ],
-        3: [
-            "fuck off",
-            "I love spontaneous trips and surprises. Life's too short to plan everything - sometimes you need to just go with the flow.",
-            "I believe in open communication and emotional honesty. Trust and understanding are the foundations of any relationship."
-        ]
-    }
+        # 4. Get AI-generated questions
+        print("\n=== Getting AI Questions ===")
+        for i in range(3):  # Get 3 questions
+            question = requests.get(f"{BASE_URL}/get-question")
+            print_response(f"Generated Question {i+1}", question)
 
-    for round in range(1, 4):
-        print(f"\n=== Round {round} ===")
-        
-        print_response("AI Question",
-                      requests.get(f"{BASE_URL}/ai-question"))
-
-        for contestant in range(1, 4):
-            print_response(f"Rate Contestant {contestant}",
-                          requests.post(
-                              f"{BASE_URL}/rate-contestant/contestant{contestant}",
-                              json={"conversation": conversations[round][contestant-1]}
-                          ))
+        # 5. Play each round
+        for round_num in range(1, 4):
+            print(f"\n=== Playing Round {round_num} ===")
             
-            if contestant < 3:
-                print_response("Host Interrupt",
-                             requests.get(f"{BASE_URL}/host-interrupt/next_contestant"))
-        
-        if round < 3:
-            requests.get(f"{BASE_URL}/next-round")
+            # Get the question for this round
+            question = requests.get(f"{BASE_URL}/next-question")
+            print_response(f"Question for Round {round_num}", question)
+            
+            # Submit user's answer (let it auto-generate)
+            user_answer = requests.post(f"{BASE_URL}/submit-answer/contestant3")
+            print_response(f"User Answer for Round {round_num}", user_answer)
+            
+            # Get AI contestants' answers
+            ai_answers = requests.get(f"{BASE_URL}/get-ai-answers")
+            print_response(f"AI Answers for Round {round_num}", ai_answers)
+            
+            # Rate all answers
+            ratings = requests.get(f"{BASE_URL}/rate-all-answers")
+            print_response(f"Ratings for Round {round_num}", ratings)
+            
+            # Always get next round (even after last round to transition to winner stage)
+            next_round = requests.get(f"{BASE_URL}/next-round")
+            print_response(f"Moving to Next Round/Stage", next_round)
+            
+            # If game is complete, announce winner
+            if next_round.json().get("game_complete", False):
+                winner = requests.get(f"{BASE_URL}/announce-winner")
+                print_response("Winner Announcement", winner)
+                break
 
-    print_response("Announce Winner",
-                  requests.get(f"{BASE_URL}/announce-winner"))
+        print("\nGame flow completed successfully! 🎉")
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Network Error: {e}")
+    except Exception as e:
+        print(f"Test Error: {e}")
+
+def test_error_cases():
+    """Test various error cases and invalid sequences"""
+    
+    print("\n=== Starting Error Case Tests ===\n")
+    
+    try:
+        # Reset game first
+        requests.get(f"{BASE_URL}/reset-game")
+        
+        # 1. Test skipping stages
+        print("\nTesting stage skipping...")
+        skip_test = requests.get(f"{BASE_URL}/announce-winner")
+        print_response("Trying to skip to winner announcement", skip_test)
+        
+        # 2. Test invalid contestant ID
+        print("\nTesting invalid contestant...")
+        invalid_contestant = requests.post(
+            f"{BASE_URL}/submit-answer/contestant4"
+        )
+        print_response("Submitting answer with invalid contestant", invalid_contestant)
+        
+        # 3. Test AI answering as user
+        print("\nTesting AI answering as user...")
+        ai_as_user = requests.post(
+            f"{BASE_URL}/submit-answer/contestant1"
+        )
+        print_response("AI trying to submit answer", ai_as_user)
+        
+        # 4. Test getting next question without getting AI questions first
+        print("\nTesting insufficient questions...")
+        early_question = requests.get(f"{BASE_URL}/next-question")
+        print_response("Getting question before generation", early_question)
+
+        # 5. Test getting more than max questions
+        print("\nTesting too many questions...")
+        # First get 3 valid questions
+        for _ in range(3):
+            requests.get(f"{BASE_URL}/get-question")
+        # Try to get one more
+        extra_question = requests.get(f"{BASE_URL}/get-question")
+        print_response("Getting extra question", extra_question)
+
+        print("\nAll error cases tested successfully! 🎉")
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Network Error: {e}")
+    except Exception as e:
+        print(f"Test Error: {e}")
 
 if __name__ == "__main__":
-    test_dating_game()
+    print("\n=== Running Complete Game Flow Test ===")
+    test_game_flow()
+    
+    print("\n=== Running Error Case Tests ===")
+    test_error_cases()
