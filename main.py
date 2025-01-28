@@ -303,30 +303,54 @@ async def next_round():
     game_state.current_round += 1
     print(f"[NEXT ROUND] Current round is now {game_state.current_round}")
     
-    if game_state.current_round > game_state.max_rounds:
+    if game_state.current_round == game_state.max_rounds:
         game_state.stage = "winner_announcement"
+        print("[NEXT ROUND] Final round completed, moving to winner announcement")
         return {"current_round": game_state.current_round, "game_complete": True}
-    else:
-        game_state.stage = "round_start"
-        return {"current_round": game_state.current_round, "game_complete": False}
+    
+    game_state.stage = "round_start"
+    return {"current_round": game_state.current_round, "game_complete": False}
 
 @app.get("/announce-winner")
 async def announce_winner():
+    print("\n[WINNER ANNOUNCEMENT] Starting winner announcement process...")
+    
     if game_state.stage != "winner_announcement":
-        raise HTTPException(status_code=400, detail="Not the correct stage for announcing winner.")
-        
+        print(f"[WINNER ANNOUNCEMENT] Error: Invalid game stage {game_state.stage}")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Not the correct stage for announcing winner. Current stage: {game_state.stage}"
+        )
+    
+    print("[WINNER ANNOUNCEMENT] Calculating average ratings for all contestants...")
+    print(f"[WINNER ANNOUNCEMENT] Raw ratings: {game_state.contestant_ratings}")
+    
+    # Add error handling for empty ratings
+    for contestant, ratings in game_state.contestant_ratings.items():
+        if not ratings:
+            print(f"[WINNER ANNOUNCEMENT] Warning: No ratings found for {contestant}")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Missing ratings for contestant: {contestant}"
+            )
+    
     avg_ratings = {
         contestant: sum(ratings)/len(ratings) 
         for contestant, ratings in game_state.contestant_ratings.items()
-        if ratings  # Only calculate if contestant has ratings
     }
     
-    if not avg_ratings:
-        raise HTTPException(status_code=400, detail="No ratings available to determine winner")
-        
+    print(f"[WINNER ANNOUNCEMENT] Calculated average ratings: {avg_ratings}")
+    
     winner = max(avg_ratings.items(), key=lambda x: x[1])[0]
+    print(f"[WINNER ANNOUNCEMENT] Winner determined: {winner} with average rating {avg_ratings[winner]}")
+    
+    print("[WINNER ANNOUNCEMENT] Generating winner announcement message...")
     response = await chains["winner"].ainvoke({"winner": winner})
-    game_state.stage = "game_complete"  # Set to final stage
+    print(f"[WINNER ANNOUNCEMENT] Generated announcement: {response['text']}")
+    
+    game_state.stage = "game_complete"
+    print("[WINNER ANNOUNCEMENT] Game stage updated to: game_complete")
+    
     return {
         "text": response["text"], 
         "winner": winner,
