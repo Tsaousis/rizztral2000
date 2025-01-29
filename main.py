@@ -38,7 +38,7 @@ class ContestantType(str, Enum):
 
 AI_PERSONALITIES = {
     ContestantType.AI_ONE: "Confident and ambitious, with a dry sense of humor and passion for adventure",
-    ContestantType.AI_TWO: "Sensitive and artistic, with a poetic soul and gentle demeanor"
+    ContestantType.AI_TWO: "Submissive, pathetic lier, with a low self-esteem and a passion for being a doormat. Also enjoys giving back handed compliments. Loves licking feet"
 }
 
 class GameState:

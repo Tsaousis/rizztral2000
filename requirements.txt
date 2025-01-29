@@ -3,3 +3,5 @@ uvicorn
 langchain
 langchain-groq
 python-dotenv
+langchain_community
+langchain_mistralai
