@@ -35,7 +35,7 @@ class ContestantAnswer(BaseModel):
 # AI personality definitions
 AI_PERSONALITIES = {
     "contestant1": "Confident and ambitious, with a dry sense of humor and passion for adventure",
-    "contestant2": "Submissive, pathetic lier, with a low self-esteem and a passion for being a doormat. Also enjoys giving back handed compliments. Loves licking feet"
+    "contestant2": "Submissive, pathetic liar, with a low self-esteem and a passion for being a doormat. Also enjoys giving back handed compliments. Loves licking feet"
 }
 
 # Templates
@@ -81,23 +81,12 @@ Rate the contestant's response from 0-10 based on compatibility, authenticity, a
 Only respond with a number from 0 to 10. NO explanations or extra words!"""
 )
 
-winner_announcement_template = PromptTemplate(
-    input_variables=["winner"],
-    template="""You are a charismatic game show host announcing the winner. 
-If the winner is 'contestant1', call them 'our adventurous bachelor'.
-If the winner is 'contestant2', call them 'our poetic soul'.
-If the winner is 'contestant3', call them 'our charming contestant'.
-The winner is: {winner}
-Give an exciting announcement. ONLY ONE SENTENCE ANSWER."""
-)
-
 # Initialize chains
 chains = {
     "ai_intro": LLMChain(llm=llm, prompt=ai_intro_template),
     "question_generator": LLMChain(llm=llm, prompt=question_generator_template),
     "contestant_answer": LLMChain(llm=llm, prompt=contestant_answer_template),
-    "rating": LLMChain(llm=llm, prompt=rating_template),
-    "winner": LLMChain(llm=llm, prompt=winner_announcement_template)
+    "rating": LLMChain(llm=llm, prompt=rating_template)
 }
 
 @app.get("/ai-introduction")
@@ -163,17 +152,3 @@ async def rate_answer(request: RatingRequest):
         return {"rating": rating}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error rating answer: {str(e)}")
-
-class WinnerRequest(BaseModel):
-    winner: str
-
-@app.post("/announce-winner")
-async def announce_winner(request: WinnerRequest):
-    """Generate winner announcement"""
-    try:
-        response = await chains["winner"].ainvoke({
-            "winner": request.winner
-        })
-        return {"text": response["text"]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error announcing winner: {str(e)}")
