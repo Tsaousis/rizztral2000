@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.prompts import PromptTemplate
-from langchain_groq import ChatGroq
 from langchain.chains import LLMChain
 from pydantic import BaseModel
 from typing import List, Dict, Literal
