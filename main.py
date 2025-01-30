@@ -5,8 +5,10 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from pydantic import BaseModel
 import os
+from dotenv import load_dotenv
 from langchain_mistralai import ChatMistralAI
 import nest_asyncio
+load_dotenv()
 
 questions = [
     "Steak or sushi",
