@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from pydantic import BaseModel
-from typing import Dict
 import os
 from langchain_mistralai import ChatMistralAI
+import nest_asyncio
+
+nest_asyncio.apply()
 
 app = FastAPI()
 
@@ -15,8 +17,19 @@ async def read_root():
     return {"status": "alive", "message": "Server is running"}
 
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
-llm = ChatMistralAI(
+llm_host_and_bachelorette = ChatMistralAI(
     model="mistral-large-latest",
+    temperature=0,
+    max_retries=2
+)
+
+llm_contestant1 = ChatMistralAI(
+    model="ministral-3b-latest",
+    temperature=0,
+    max_retries=2
+)
+llm_contestant2 = ChatMistralAI(
+    model="ministral-8b-latest",
     temperature=0,
     max_retries=2
 )
@@ -31,12 +44,6 @@ app.add_middleware(
 
 class ContestantAnswer(BaseModel):
     answer: str
-
-# AI personality definitions
-AI_PERSONALITIES = {
-    "contestant1": "Confident and ambitious, with a dry sense of humor and passion for adventure",
-    "contestant2": "Submissive, pathetic liar, with a low self-esteem and a passion for being a doormat. Also enjoys giving back handed compliments. Loves licking feet"
-}
 
 # Templates
 ai_intro_template = PromptTemplate(
@@ -67,71 +74,58 @@ Generate a creative, funny dating show question. ONLY RETURN THE QUESTION."""
 )
 
 contestant_answer_template = PromptTemplate(
-    input_variables=["question", "personality"],
+    input_variables=["question"],
     template="""You are a contestant on a dating show answering this question: {question}
-Your personality type is: {personality}
 Give a flirty but authentic answer, staying true to your character. Keep it under 3 sentences."""
 )
 
 rating_template = PromptTemplate(
     input_variables=["conversation", "round_number"],
-    template="""Based on the following conversation in round {round_number}:
+    template="""You are the Bachelorrete for a dating show, rating a contestant's response to your question. You are a hard-to-please AI with high standards and a judgmental streak.
 {conversation}
-Rate the contestant's response from 0-10 based on compatibility, authenticity, and chemistry.
+Rate the contestant's response from 0-10 based on compatibility, authenticity, and chemistry, based on the context of the conversation and trying to find the best match for you.
 Only respond with a number from 0 to 10. NO explanations or extra words!"""
 )
 
-# Initialize chains
+# Initialize chains with correct LLMs
 chains = {
-    "ai_intro": LLMChain(llm=llm, prompt=ai_intro_template),
-    "question_generator": LLMChain(llm=llm, prompt=question_generator_template),
-    "contestant_answer": LLMChain(llm=llm, prompt=contestant_answer_template),
-    "rating": LLMChain(llm=llm, prompt=rating_template)
+    "ai_intro": LLMChain(llm=llm_host_and_bachelorette, prompt=ai_intro_template),
+    "question_generator": LLMChain(llm=llm_host_and_bachelorette, prompt=question_generator_template),
+    "contestant_answer_1": LLMChain(llm=llm_contestant1, prompt=contestant_answer_template),
+    "contestant_answer_2": LLMChain(llm=llm_contestant2, prompt=contestant_answer_template),
+    "rating": LLMChain(llm=llm_host_and_bachelorette, prompt=rating_template)
 }
 
 @app.get("/ai-introduction")
 async def get_ai_introduction():
     """Generate AI bachelorette's introduction"""
     try:
-        print("Generating AI introduction...")
         response = await chains["ai_intro"].ainvoke({})
-        print(f"Generated response: {response}")
         return {"text": response["text"]}
     except Exception as e:
-        print(f"Error in get_ai_introduction: {str(e)}")
-        print(f"Error type: {type(e)}")
-        import traceback
-        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Error generating AI introduction: {str(e)}")
 
 @app.get("/get-question")
 async def get_question():
     """Generate a new question for the game"""
     try:
-        llm.temperature = 0.9  # Higher temperature for more creative questions
+        llm_host_and_bachelorette.temperature = 0.9  # Higher temperature for more creative questions
         response = await chains["question_generator"].ainvoke({})
-        llm.temperature = 0.7  # Reset temperature
+        llm_host_and_bachelorette.temperature = 0.7  # Reset temperature
         question = response["text"].strip('"')
         return {"question": question}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating question: {str(e)}")
 
 @app.get("/get-ai-answers")
-async def get_ai_answers(question: str):
+async def get_ai_answers(question: str, contestant: int):
     """Generate AI contestant responses to the current question"""
     try:
-        llm.temperature = 0.8
-        ai_answers = {}
-        
-        for contestant_id, personality in AI_PERSONALITIES.items():
-            response = await chains["contestant_answer"].ainvoke({
-                "question": question,
-                "personality": personality
-            })
-            ai_answers[contestant_id] = response["text"]
-        
-        llm.temperature = 0.7
-        return ai_answers
+        llm_host_and_bachelorette.temperature = 0.8
+        chain_name = f"contestant_answer_{contestant}"
+        response = await chains[chain_name].ainvoke({"question": question})
+        llm_host_and_bachelorette.temperature = 0.7
+        return {"answer": response["text"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating AI answers: {str(e)}")
 
@@ -143,7 +137,7 @@ class RatingRequest(BaseModel):
 async def rate_answer(request: RatingRequest):
     """Rate a single answer based on the conversation"""
     try:
-        llm.temperature = 0.6
+        llm_host_and_bachelorette.temperature = 0.6
         response = await chains["rating"].ainvoke({
             "conversation": request.conversation,
             "round_number": request.round_number
