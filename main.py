@@ -5,7 +5,10 @@ from langchain.chains import LLMChain
 from pydantic import BaseModel
 from typing import Dict
 import os
+from dotenv import load_dotenv
 from langchain_mistralai import ChatMistralAI
+
+load_dotenv()
 
 app = FastAPI()
 
