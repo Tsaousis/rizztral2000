@@ -89,7 +89,9 @@ llm_contestant2 = ChatMistralAI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://huggingface.co/spaces/Mistral-AI-Game-Jam/Rizztral"],
+    allow_origins=["https://huggingface.co/spaces/Mistral-AI-Game-Jam/Rizztral",
+                   "https://mistral-ai-game-jam-rizztral.static.hf.space",
+                   "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
