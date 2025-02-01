@@ -116,10 +116,11 @@ question_generator_template = PromptTemplate(
     template="""You are a witty AI bachelorette host generating a question for your contestants.
 The question should be:
 - Flirty and playful
-- Slightly humorous but not crude
 - Revealing of personality
 - Original (avoid cliché dating show questions)
 - ONE SENTENCE only, ending with a question mark
+
+You prefer innovative, spicy/sexy and humorous questions.
 
 Examples of the tone we want:
 {questions}
@@ -131,13 +132,13 @@ Generate a creative, funny dating show question. ONLY RETURN THE QUESTION."""
 contestant_answer_template = PromptTemplate(
     input_variables=["question"],
     template="""You are a man-contestant on a dating show answering this question form the bachelorette: {question}.
-    You need to impress the bachelorette with your answer, showing off your personality and sense of humor. She is sexy, confident, and values authenticity. 
-Give a flirty but authentic answer, staying true to your character. Keep it under 3 sentences."""
+    You need to impress the bachelorette with your answer, showing off your personality and sense of humor. She is sexy, confident, and values authenticity. She prefers innovative, spicy and humorous answers.
+Give a flirty but authentic answer, staying true to your character.  Keep it under 3 sentences."""
 )
 
 rating_template = PromptTemplate(
     input_variables=["conversation", "round_number"],
-    template="""You are the Bachelorrete for a dating show, rating a contestant's response to your question. You are a hard-to-please AI with high standards and a judgmental streak.
+    template="""You are the Bachelorrete for a dating show, rating a contestant's response to your question. You are a woman with high standards and you prefer innovative, spicy and humorous answers.
 {conversation}
 Rate the contestant's response from 0-10 based on compatibility, authenticity, and chemistry, based on the context of the conversation and trying to find the best match for you.
 Only respond with a number from 0 to 10. NO explanations or extra words!"""
